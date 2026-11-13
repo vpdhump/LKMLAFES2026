@@ -264,6 +264,7 @@
   // TẠO MÃ QR VỚI CÁC Ô TỐI ĐƯỢC PHỦ GRADIENT XANH HOÀN TOÀN
   function renderQRCode10s() {
     if (!currentCTV) return;
+
     const box = document.getElementById('qr-canvas-box');
     if (!box) return;
 
@@ -273,59 +274,71 @@
     const payload = EVENT_CODE + shortToken;
 
     box.innerHTML = '';
-    
-    // 1. Tạo QR tạm thời bên trong khung
-    const qr = new QRCode(box, {
-      text: payload, 
-      width: 220, 
+
+    new QRCode(box, {
+      text: payload,
+      width: 220,
       height: 220,
       colorDark: "#000000",
       colorLight: "#FFFFFF",
       correctLevel: QRCode.CorrectLevel.M
     });
 
-    // 2. Dùng bộ lọc Canvas để chuyển đổi các ô đen sang Gradient Xanh
+  // Chuyển các ô đen thành gradient xanh
     setTimeout(() => {
       const canvas = box.querySelector('canvas');
       if (!canvas) return;
+
       const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
       const width = canvas.width;
       const height = canvas.height;
 
-      const imgData = ctx.getImageData(0, 0, width, height);
-      const pixels = imgData.data;
+      // Lưu lại ma trận QR ban đầu
+      const qrData = ctx.getImageData(0, 0, width, height);
+      const qrPixels = qrData.data;
 
-      // Tạo bảng màu gradient xanh đại dương
-      const gradient = ctx.createLinearGradient(0, 0, width, height);
-      gradient.addColorStop(0, '#0284C7'); // Xanh đậm
-      gradient.addColorStop(1, '#38BDF8'); // Xanh sáng
+      // Tạo nền gradient xanh biển
+      const gradient = ctx.createLinearGradient(
+      0, 0, width, height
+      );
 
-      // Vẽ một lớp gradient đè lên toàn bộ canvas
-      ctx.save();
+      gradient.addColorStop(0, '#075985');
+      gradient.addColorStop(1, '#0369A1');
+
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, width, height);
-      ctx.restore();
 
-      // Giữ lại phần nền trắng, chỉ áp dụng gradient cho các ô mã QR tối
-      const maskedData = ctx.getImageData(0, 0, width, height);
-      const maskedPixels = maskedData.data;
+      // Lấy dữ liệu màu gradient
+      const gradientData = ctx.getImageData(
+        0, 0, width, height
+      );
+      const gradientPixels = gradientData.data;
 
-      for (let i = 0; i < pixels.length; i += 4) {
-        const r = pixels[i];
-        const g = pixels[i + 1];
-        const b = pixels[i + 2];
+      // Giữ gradient ở các ô QR tối, giữ trắng ở vùng còn lại
+      for (let i = 0; i < qrPixels.length; i += 4) {
+        const isDark =
+          qrPixels[i] < 128 &&
+          qrPixels[i + 1] < 128 &&
+          qrPixels[i + 2] < 128;
 
-        // Nếu điểm ảnh là màu tối (các ô mã QR gốc)
-        if (r < 80 && g < 80 && b < 80) {
-          // Giữ nguyên màu gradient đã tô
+        if (isDark) {
+          // Lấy màu gradient
+          qrPixels[i] = gradientPixels[i];
+          qrPixels[i + 1] = gradientPixels[i + 1];
+          qrPixels[i + 2] = gradientPixels[i + 2];
         } else {
-          // Trả lại màu trắng cho phần nền và vùng trống
-          maskedPixels[i] = 255;     // R
-          maskedPixels[i + 1] = 255; // G
-          maskedPixels[i + 2] = 255; // B
+          // Giữ nền trắng
+          qrPixels[i] = 255;
+          qrPixels[i + 1] = 255;
+          qrPixels[i + 2] = 255;
         }
+
+        qrPixels[i + 3] = 255;
       }
-      ctx.putImageData(maskedData, 0, 0);
+
+      ctx.putImageData(qrData, 0, 0);
     }, 60);
   }
 
