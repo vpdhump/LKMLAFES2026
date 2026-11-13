@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Lễ Khai Mạc Lafes 2026</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <style>
+    :root { --primary: #8B1538; --bg-glass: rgba(255, 255, 255, 0.4); }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Noto Sans', sans-serif; }
+    body { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 15px; }
+    body::before {
+      content: ""; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: url('https://lh3.googleusercontent.com/d/1cxyOiGghKL4M2BbcB4NgpN1of8dbxMcE') center/cover; z-index: -1;
+    }
+    .card {
+      background: var(--bg-glass); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      width: 100%; max-width: 420px; padding: 25px 20px; border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.6); box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    }
+    .logo { text-align: center; margin-bottom: 15px; } .logo img { max-width: 140px; }
+    h2, h3 { color: var(--primary); text-align: center; margin-bottom: 15px; line-height: 1.35; }
+    #studentLoginBox h2 { font-size: 18px; }
+    input { width: 100%; padding: 12px; margin-bottom: 12px; border: 2px solid #EAD5E7; border-radius: 8px; font-size: 15px; outline: none; background: #fff; }
+    input:focus { border-color: var(--primary); }
+    button { width: 100%; padding: 13px; border: none; border-radius: 8px; font-weight: bold; font-size: 15px; cursor: pointer; margin-bottom: 10px; }
+    .btn-main { background: var(--primary); color: white; }
+    .btn-sub { background: transparent; border: 2px solid var(--primary); color: var(--primary); }
+    .role-switch { text-align: center; margin-top: 15px; font-size: 13px; color: var(--primary); text-decoration: underline; cursor: pointer; }
+    .hidden { display: none !important; }
+    .loader { text-align: center; color: var(--primary); font-weight: bold; font-size: 13px; margin: 8px 0 15px; padding: 8px; background: rgba(255, 255, 255, 0.55); border-radius: 8px; }
+
+    /* KHUNG QR KÈM WATERMARK 30% */
+    #qr-canvas-box { 
+      position: relative; display: flex; justify-content: center; align-items: center; 
+      width: 250px; height: 250px; margin: 15px auto; padding: 12px; 
+      background: #FFFFFF; border: 2px solid #222222; border-radius: 8px; 
+      box-sizing: border-box; overflow: hidden; 
+    }
+    #qr-canvas-box::before {
+      content: ""; position: absolute; inset: 0;
+      background: url('https://lh3.googleusercontent.com/d/1Q2YEv6D7bIg6i47ORc8pdiiN2aKJcuKI') center/72% no-repeat;
+      opacity: 0.3;
+      pointer-events: none; z-index: 1;
+    }
+    #qr-canvas-box img, #qr-canvas-box canvas { 
+      position: relative; z-index: 2; display: block; 
+      width: 220px !important; height: 220px !important; max-width: 100%; 
+      object-fit: contain; mix-blend-mode: multiply; 
+    }
+
+    .timer-bar-bg { width: 100%; background-color: #e2e8f0; height: 8px; border-radius: 9999px; overflow: hidden; margin-top: 8px; }
+    .timer-bar-fill { background: linear-gradient(to right, #8B1538, #d97706); height: 100%; width: 100%; transition: width 0.3s linear; }
+    .dev-credit { text-align: center; font-size: 13px; color: var(--primary); margin-top: 25px; font-weight: 800; font-style: italic; letter-spacing: 0.5px; text-shadow: 0px 1px 3px rgba(255, 255, 255, 0.9); }
+
+    /* THANH THẢ XUỐNG TÍNH NĂNG HỖ TRỢ SINH VIÊN */
+    .support-dropdown-wrap { margin-top: 18px; border-top: 2px dashed rgba(139, 21, 56, 0.4); padding-top: 14px; }
+    .dropdown-header {
+      display: flex; justify-content: space-between; align-items: center;
+      width: 100%; padding: 12px 15px; background: rgba(255, 255, 255, 0.85);
+      border: 1.5px solid var(--primary); border-radius: 10px;
+      color: var(--primary); font-weight: bold; font-size: 14px;
+      cursor: pointer; user-select: none; transition: all 0.2s ease;
+    }
+    .dropdown-header:active { transform: scale(0.99); }
+    .dropdown-arrow { font-size: 13px; transition: transform 0.25s ease; }
+    .dropdown-arrow.open { transform: rotate(180deg); }
+    
+    .dropdown-body {
+      margin-top: 10px; padding: 14px; background: rgba(255, 255, 255, 0.65);
+      border-radius: 12px; border: 1px solid rgba(139, 21, 56, 0.25);
+    }
+    .support-panel h3 { font-size: 14px; margin-bottom: 5px; }
+    .support-panel p { font-size: 11px; text-align: center; color: #475569; margin-bottom: 10px; line-height: 1.4; }
+    .support-panel input[type="text"] { padding: 10px; font-size: 13px; border: 1px solid #ccc; }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="logo"><img src="https://lh3.googleusercontent.com/d/1pX-U4BcmFGPe6eBJL5FoXz-UHnUtg8p4"></div>
+  <div class="loader hidden" id="loader">Đang xử lý...</div>
+
+  <!-- 1. FORM SINH VIÊN -->
+  <div id="studentLoginBox">
+    <h2>CỔNG CHECK-OUT LỄ KHAI MẠC CHƯƠNG TRÌNH LAFES 2026</h2>
+    <input type="text" id="svMssv" placeholder="Nhập MSSV">
+    <input type="text" id="svHoTen" placeholder="Nhập Họ và Tên">
+    <input type="text" id="svLop" placeholder="Nhập Lớp">
+    <button class="btn-main" onclick="handleStudentLogin()">Đăng nhập Hệ Thống</button>
+    <div class="role-switch" onclick="switchRole('ctv')">🔐 Đăng nhập dành cho Ban Tổ Chức...</div>
+  </div>
+
+  <!-- 2. FORM BAN TỔ CHỨC -->
+  <div id="ctvLoginBox" class="hidden">
+    <h2>ĐĂNG NHẬP BAN TỔ CHỨC</h2>
+    <input type="text" id="ctvUser" placeholder="ID Tài khoản đã cấp">
+    <input type="password" id="ctvPass" placeholder="Password">
+    <button class="btn-main" onclick="handleCtvLogin()">Đăng nhập</button>
+    <div class="role-switch" onclick="switchRole('student')">⬅ Quay lại Đăng nhập Sinh viên</div>
+  </div>
+
+  <!-- 3. DASHBOARD SINH VIÊN -->
+  <div id="studentDash" class="hidden">
+    <h2>CHÀO MỪNG BẠN</h2>
+    <p style="text-align:center; margin-bottom:15px;"><b id="svNameDisp"></b> - <span id="svClassDisp"></span></p>
+    <button class="btn-main" onclick="openStudentScanner()">📸 Quét mã QR Check-out</button>
+    <div id="svStatus" style="text-align:center; font-weight:bold; margin-top:15px; color:var(--primary);"></div>
+  </div>
+
+  <!-- 4. DASHBOARD BAN TỔ CHỨC -->
+  <div id="ctvDash" class="hidden">
+    <h2 id="stationTitle">LỄ KHAI MẠC LAFES 2026</h2>
+    
+    <!-- KHUNG QR CỐ ĐỊNH KÈM WATERMARK 30% -->
+    <div id="qr-canvas-box"></div>
+    <div style="margin-top: 10px;">
+      <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:bold; color:#475569;">
+        <span>Tự đổi mã sau:</span>
+        <span id="time-countdown" style="color:var(--primary);">10s</span>
+      </div>
+      <div class="timer-bar-bg"><div id="progress-bar" class="timer-bar-fill"></div></div>
+    </div>
+
+    <!-- TRÌNH THẢ XUỐNG: CHỈ HIỂN THỊ TÍNH NĂNG HỖ TRỢ GỠ LỖI THIẾT BỊ -->
+    <div class="support-dropdown-wrap">
+      <div class="dropdown-header" onclick="toggleSupportDropdown()">
+        <span>Tính năng hỗ trợ sinh viên</span>
+        <span id="dropdownArrow" class="dropdown-arrow">▼</span>
+      </div>
+
+      <div id="supportDropdownBody" class="dropdown-body hidden">
+        <div id="panelResetDevice" class="support-panel">
+          <h3>🛠 HỖ TRỢ GỠ LỖI THIẾT BỊ</h3>
+          <p>Dùng để gỡ mã thiết bị cũ khi sinh viên hết pin / đổi điện thoại</p>
+          <input type="text" id="resetMssv" placeholder="Nhập MSSV cần gỡ">
+          <input type="text" id="resetHoTen" placeholder="Nhập chính xác Họ và Tên">
+          <input type="text" id="resetLop" placeholder="Nhập chính xác Lớp">
+          <button class="btn-sub" style="margin-bottom:0;" onclick="handleResetDevice()">Xóa mã thiết bị</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. KHUNG CAMERA QUÉT -->
+  <div id="scannerBox" class="hidden">
+    <h3>HÃY QUÉT MÃ QR CỦA BAN TỔ CHỨC</h3>
+    <div id="reader" style="width:100%; margin:15px 0;"></div>
+    <button class="btn-sub" onclick="closeStudentScanner()">Hủy Quét</button>
+  </div>
+
+  <div class="dev-credit">This website was developed by Le Thanh Hai</div>
+</div>
+
+<script>
+  // DÁN LINK WEB APP (.../exec) CỦA FILE CHECKOUT LAFES 2026 VÀO ĐÂY:
+  const API_URL = 'DÁN_LINK_WEB_APP_EXEC_MỚI_VÀO_ĐÂY';
+  const SECRET_KEY = "LAFES2026_SECRET_KEY"; 
+  const EVENT_CODE = "LKMLAFES2026";
+
+  let deviceId = localStorage.getItem('LAFES26_DEVICE_ID');
+  if (!deviceId) {
+    deviceId = 'DEV_' + Math.random().toString(36).substring(2, 11) + '_' + Date.now();
+    localStorage.setItem('LAFES26_DEVICE_ID', deviceId);
+  }
+
+  let currentSV = null, currentCTV = null, timerInterval = null, html5Scanner = null;
+  let isProcessingScan = false; // Chốt chặn quét đúp trên camera
+
+  function showEl(id) { document.getElementById(id).classList.remove('hidden'); }
+  function hideEl(id) { document.getElementById(id).classList.add('hidden'); }
+  function switchRole(role) {
+    if (role === 'ctv') { hideEl('studentLoginBox'); showEl('ctvLoginBox'); }
+    else { hideEl('ctvLoginBox'); showEl('studentLoginBox'); }
+  }
+
+  function toggleSupportDropdown() {
+    const body = document.getElementById('supportDropdownBody');
+    const arrow = document.getElementById('dropdownArrow');
+    if (body.classList.contains('hidden')) {
+      body.classList.remove('hidden');
+      arrow.classList.add('open');
+    } else {
+      body.classList.add('hidden');
+      arrow.classList.remove('open');
+    }
+  }
+
+  async function callAPI(payload) {
+    showEl('loader');
+    try {
+      const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
+      const data = await res.json();
+      hideEl('loader');
+      return data;
+    } catch(e) { hideEl('loader'); alert('Lỗi kết nối máy chủ!'); return null; }
+  }
+
+  // ĐĂNG NHẬP SINH VIÊN (KHÔNG CÓ TÍNH NĂNG ĐÁ VĂNG THIẾT BỊ)
+  async function handleStudentLogin() {
+    const mssv = document.getElementById('svMssv').value.trim();
+    const hoTen = document.getElementById('svHoTen').value.trim();
+    const lop = document.getElementById('svLop').value.trim();
+    if (!mssv || !hoTen || !lop) return alert('Vui lòng nhập đầy đủ thông tin!');
+
+    const res = await callAPI({ action: 'studentLogin', mssv: mssv, hoTen: hoTen, lop: lop, deviceId: deviceId });
+    if (!res) return;
+
+    if (res.status === 'success') {
+      enterStudentDash(res.student);
+    } else {
+      alert(res.message);
+    }
+  }
+
+  // GỠ MÃ THIẾT BỊ DÀNH CHO BTC
+  async function handleResetDevice() {
+    const mssv = document.getElementById('resetMssv').value.trim();
+    const hoTen = document.getElementById('resetHoTen').value.trim();
+    const lop = document.getElementById('resetLop').value.trim();
+
+    if(!mssv || !hoTen || !lop) return alert("Vui lòng nhập đầy đủ 3 thông tin để gỡ thiết bị!");
+    if(!confirm(`Xác nhận gỡ mã thiết bị cho MSSV: ${mssv}?`)) return;
+
+    const res = await callAPI({ action: 'resetDevice', mssv: mssv, hoTen: hoTen, lop: lop });
+    if (res) {
+      alert(res.message);
+      if (res.success) {
+        document.getElementById('resetMssv').value = "";
+        document.getElementById('resetHoTen').value = "";
+        document.getElementById('resetLop').value = "";
+      }
+    }
+  }
+
+  function enterStudentDash(svData) {
+    currentSV = svData;
+    document.getElementById('svNameDisp').innerText = svData.hoTen;
+    document.getElementById('svClassDisp').innerText = svData.lop;
+    hideEl('studentLoginBox'); showEl('studentDash');
+  }
+
+  function openStudentScanner() {
+    isProcessingScan = false;
+    hideEl('studentDash'); showEl('scannerBox');
+    html5Scanner = new Html5Qrcode("reader");
+    html5Scanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 240 }, onScanSuccess)
+      .catch(err => { alert('Lỗi mở Camera: ' + err); closeStudentScanner(); });
+  }
+
+  function closeStudentScanner() {
+    hideEl('scannerBox'); showEl('studentDash');
+    if (html5Scanner) html5Scanner.stop().then(() => html5Scanner.clear()).catch(e => console.log(e));
+  }
+
+  async function onScanSuccess(decodedText) {
+    if (isProcessingScan) return;
+    isProcessingScan = true;
+    closeStudentScanner();
+
+    const res = await callAPI({ action: 'processStudentScan', mssv: currentSV.mssv, deviceId: deviceId, qrData: decodedText });
+    if (res) {
+      document.getElementById('svStatus').innerText = res.message;
+      alert(res.message);
+    }
+  }
+
+  async function handleCtvLogin() {
+    const u = document.getElementById('ctvUser').value.trim();
+    const p = document.getElementById('ctvPass').value.trim();
+    const res = await callAPI({ action: 'ctvLogin', username: u, password: p });
+
+    if (res && res.success) {
+      currentCTV = res;
+      hideEl('ctvLoginBox'); showEl('ctvDash');
+      startCountdown10s();
+    } else if (res) { alert(res.message); }
+  }
+
+  // TẠO MÃ QR CỐ ĐỊNH LKMLAFES2026 + 8 KÝ TỰ TOKEN ĐỔI MỖI 10 GIÂY
+  function renderQRCode10s() {
+    if (!currentCTV) return;
+    const box = document.getElementById('qr-canvas-box');
+    if (!box) return;
+
+    const currentBlock = Math.floor(Date.now() / 10000);
+    const rawString = SECRET_KEY + "_" + EVENT_CODE + "_" + currentBlock;
+    const shortToken = md5(rawString).substring(0, 8);
+    const payload = EVENT_CODE + shortToken;
+
+    box.innerHTML = '';
+    new QRCode(box, {
+      text: payload, width: 220, height: 220,
+      colorDark: "#8B1538", colorLight: "#FFFFFF", correctLevel: QRCode.CorrectLevel.M
+    });
+  }
+
+  let lastBlock = -1;
+  function startCountdown10s() {
+    if (timerInterval) clearInterval(timerInterval);
+    lastBlock = -1;
+
+    function tick() {
+      if (!currentCTV) return;
+      const now = Date.now();
+      const secondsLeft = 10 - (Math.floor(now / 1000) % 10);
+
+      const countEl = document.getElementById("time-countdown");
+      if (countEl) countEl.innerText = `${secondsLeft}s`;
+
+      const barEl = document.getElementById("progress-bar");
+      if (barEl) barEl.style.width = `${(secondsLeft / 10) * 100}%`;
+
+      const block = Math.floor(now / 10000);
+      if (block !== lastBlock) {
+        lastBlock = block;
+        renderQRCode10s();
+      }
+    }
+    tick();
+    timerInterval = setInterval(tick, 250);
+  }
+</script>
+</body>
+</html>
