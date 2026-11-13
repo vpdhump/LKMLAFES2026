@@ -253,8 +253,8 @@
 
   // TẠO MÃ QR VỚI CÁC Ô TỐI ĐƯỢC PHỦ GRADIENT XANH HOÀN TOÀN
   function renderQRCode10s() {
+  function renderQRCode10s() {
     if (!currentCTV) return;
-
     const box = document.getElementById('qr-canvas-box');
     if (!box) return;
 
@@ -265,71 +265,68 @@
 
     box.innerHTML = '';
 
-    new QRCode(box, {
-      text: payload,
-      width: 220,
-      height: 220,
-      colorDark: "#000000",
-      colorLight: "#FFFFFF",
-      correctLevel: QRCode.CorrectLevel.M
-    });
+    // Tạo QR tạm trong vùng ẩn để không xuất hiện QR đen
+    const temp = document.createElement('div');
+    
+    new QRCode(temp, { text: payload, width: 440, height: 440, colorDark: '#000000', colorLight: '#FFFFFF', correctLevel: QRCode.CorrectLevel.M });
 
-  // Chuyển các ô đen thành gradient xanh
-    setTimeout(() => {
-      const canvas = box.querySelector('canvas');
-      if (!canvas) return;
+    const sourceCanvas = temp.querySelector('canvas');
+    if (!sourceCanvas) return;
 
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
+    // Tạo canvas hiển thị QR gradient
+    const output = document.createElement('canvas');
+    output.width = 440;
+    output.height = 440;
 
-      const width = canvas.width;
-      const height = canvas.height;
+    const ctx = output.getContext('2d');
 
-      // Lưu lại ma trận QR ban đầu
-      const qrData = ctx.getImageData(0, 0, width, height);
-      const qrPixels = qrData.data;
+    // Vẽ nền trắng
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, 440, 440);
 
-      // Tạo nền gradient xanh biển
-      const gradient = ctx.createLinearGradient(
-      0, 0, width, height
-      );
+    // Tạo gradient xanh
+    const gradient = ctx.createLinearGradient(0, 0, 440, 440);
+    gradient.addColorStop(0, '#075985');
+    gradient.addColorStop(0.5, '#0284C7');
+    gradient.addColorStop(1, '#38BDF8');
 
-      gradient.addColorStop(0, '#075985');
-      gradient.addColorStop(1, '#0369A1');
+    // Tạo mặt nạ từ QR gốc
+    const sourceCtx = sourceCanvas.getContext('2d');
+    const imageData = sourceCtx.getImageData(0, 0, 440, 440);
+    const pixels = imageData.data;
 
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, width, height);
+    const gradientCanvas = document.createElement('canvas');
+    gradientCanvas.width = 440;
+    gradientCanvas.height = 440;
 
-      // Lấy dữ liệu màu gradient
-      const gradientData = ctx.getImageData(
-        0, 0, width, height
-      );
-      const gradientPixels = gradientData.data;
+    const gradientCtx = gradientCanvas.getContext('2d');
+    gradientCtx.fillStyle = gradient;
+    gradientCtx.fillRect(0, 0, 440, 440);
 
-      // Giữ gradient ở các ô QR tối, giữ trắng ở vùng còn lại
-      for (let i = 0; i < qrPixels.length; i += 4) {
-        const isDark =
-          qrPixels[i] < 128 &&
-          qrPixels[i + 1] < 128 &&
-          qrPixels[i + 2] < 128;
+    const gradientData = gradientCtx.getImageData(0, 0, 440, 440);
+    const gradientPixels = gradientData.data;
 
-        if (isDark) {
-          // Lấy màu gradient
-          qrPixels[i] = gradientPixels[i];
-          qrPixels[i + 1] = gradientPixels[i + 1];
-          qrPixels[i + 2] = gradientPixels[i + 2];
-        } else {
-          // Giữ nền trắng
-          qrPixels[i] = 255;
-          qrPixels[i + 1] = 255;
-          qrPixels[i + 2] = 255;
-        }
-
-        qrPixels[i + 3] = 255;
+    for (let i = 0; i < pixels.length; i += 4) {
+      if (pixels[i] < 128) {
+        pixels[i] = gradientPixels[i];
+        pixels[i + 1] = gradientPixels[i + 1];
+        pixels[i + 2] = gradientPixels[i + 2];
+      } else {
+        pixels[i] = 255;
+        pixels[i + 1] = 255;
+        pixels[i + 2] = 255;
       }
+      pixels[i + 3] = 255;
+    }
 
-      ctx.putImageData(qrData, 0, 0);
-    }, 60);
+    ctx.putImageData(imageData, 0, 0);
+
+    // Chỉ đưa QR đã hoàn thiện lên giao diện
+    output.style.width = '220px';
+    output.style.height = '220px';
+    output.style.display = 'block';
+
+    box.appendChild(output);
   }
 
   let lastBlock = -1;
