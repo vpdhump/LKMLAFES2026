@@ -87,7 +87,7 @@
 
   <!-- 1. FORM SINH VIÊN -->
   <div id="studentLoginBox">
-    <h2>CỔNG CHECK-OUT LỄ KHAI MẠC CHƯƠNG TRÌNH LAFES 2026</h2>
+    <h2>CHECK-OUT LỄ KHAI MẠC</h2>
     <input type="text" id="svMssv" placeholder="Nhập MSSV">
     <input type="text" id="svHoTen" placeholder="Nhập Họ và Tên">
     <input type="text" id="svLop" placeholder="Nhập Lớp">
@@ -293,10 +293,58 @@
     const payload = EVENT_CODE + shortToken;
 
     box.innerHTML = '';
-    new QRCode(box, {
-      text: payload, width: 220, height: 220,
-      colorDark: "#8B1538", colorLight: "#FFFFFF", correctLevel: QRCode.CorrectLevel.M
+    
+    // 1. Tạo QR chuẩn trên canvas ẩn trước
+    const qr = new QRCode(box, {
+      text: payload, 
+      width: 220, 
+      height: 220,
+      colorDark: "#000000", // Tạm thời để đen để lấy khung chuẩn
+      colorLight: "#FFFFFF", 
+      correctLevel: QRCode.CorrectLevel.M
     });
+
+    // 2. Dùng Canvas API để phủ màu Gradient (`#1E3A8A` sang `#30A9FC`) lên các ô đen của QR
+    setTimeout(() => {
+      const canvas = box.querySelector('canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const width = canvas.width;
+      const height = canvas.height;
+
+      // Lấy ảnh gốc của QR
+      const imgData = ctx.getImageData(0, 0, width, height);
+      const pixels = imgData.data;
+
+      // Tạo dải màu gradient từ Xanh đậm sang Xanh sáng
+      const gradient = ctx.createLinearGradient(0, 0, width, height);
+      gradient.addColorStop(0, '#1E3A8A'); // Xanh đậm chuyên nghiệp (đảm bảo độ tương phản quét)
+      gradient.addColorStop(1, '#30A9FC'); // Xanh sáng đại dương theo ý bạn
+
+      // Thay thế các điểm tối bằng màu gradient, giữ nguyên nền trắng
+      for (let i = 0; i < pixels.length; i += 4) {
+        const red = pixels[i];
+        const green = pixels[i + 1];
+        const blue = pixels[i + 2];
+
+        // Nếu điểm ảnh là màu tối (các ô mã QR)
+        if (red < 100 && green < 100 && blue < 100) {
+          // Tính toán vị trí x, y để gán màu gradient tương ứng
+          const idx = i / 4;
+          const x = idx % width;
+          const y = Math.floor(idx / width);
+          
+          // Lấy màu mẫu từ gradient tại vị trí (x, y)
+          // Đơn giản hóa bằng cách tô đè màu trực tiếp hoặc dùng fillRect theo vùng
+        }
+      }
+      
+      // Cách tối ưu và mượt mà hơn cho Web Canvas:
+      ctx.globalCompositeOperation = 'source-in';
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, width, height);
+      ctx.globalCompositeOperation = 'source-over';
+    }, 50);
   }
 
   let lastBlock = -1;
